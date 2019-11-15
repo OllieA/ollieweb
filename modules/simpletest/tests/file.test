@@ -480,21 +480,6 @@ class FileValidatorTest extends DrupalWebTestCase {
    * Test file_validate_size().
    */
   function testFileValidateSize() {
-    global $user;
-    $original_user = $user;
-    drupal_save_session(FALSE);
-
-    // Run these test as uid = 1.
-    $user = user_load(1);
-
-    $file = new stdClass();
-    $file->filesize = 999999;
-    $errors = file_validate_size($file, 1, 1);
-    $this->assertEqual(count($errors), 0, 'No size limits enforced on uid=1.', 'File');
-
-    // Run these tests as a regular user.
-    $user = $this->drupalCreateUser();
-
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
     $file = new stdClass();
     $file->filesize = 1000;
@@ -506,9 +491,6 @@ class FileValidatorTest extends DrupalWebTestCase {
     $this->assertEqual(count($errors), 1, 'Error for the user being over their limit.', 'File');
     $errors = file_validate_size($file, 1, 1);
     $this->assertEqual(count($errors), 2, 'Errors for both the file and their limit.', 'File');
-
-    $user = $original_user;
-    drupal_save_session(TRUE);
   }
 }
 
@@ -952,7 +934,7 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertTrue(is_file(file_default_scheme() . '://.htaccess'), 'Successfully re-created the .htaccess file in the files directory.', 'File');
     // Verify contents of .htaccess file.
     $file = file_get_contents(file_default_scheme() . '://.htaccess');
-    $this->assertEqual($file, "SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006\nOptions None\nOptions +FollowSymLinks", 'The .htaccess file contains the proper content.', 'File');
+    $this->assertEqual($file, file_htaccess_lines(FALSE), 'The .htaccess file contains the proper content.', 'File');
   }
 
   /**
@@ -974,6 +956,15 @@ class FileDirectoryTest extends FileTestCase {
     $expected = $directory . '/druplicon_0.png';
     $path = file_create_filename($basename, $directory);
     $this->assertEqual($path, $expected, format_string('Creating a new filepath from %original equals %new.', array('%new' => $path, '%original' => $original)), 'File');
+
+    try {
+      $filename = "a\xFFtest\x80€.txt";
+      file_create_filename($filename, $directory);
+      $this->fail('Expected exception not thrown');
+    }
+    catch (RuntimeException $e) {
+      $this->assertEqual("Invalid filename '$filename'", $e->getMessage());
+    }
 
     // @TODO: Finally we copy a file into a directory several times, to ensure a properly iterating filename suffix.
   }
@@ -1007,6 +998,14 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertNotEqual($path, $destination, 'A new filepath destination is created when filepath destination already exists with FILE_EXISTS_RENAME.', 'File');
     $path = file_destination($destination, FILE_EXISTS_ERROR);
     $this->assertEqual($path, FALSE, 'An error is returned when filepath destination already exists with FILE_EXISTS_ERROR.', 'File');
+
+    try {
+      file_destination("core/misc/a\xFFtest\x80€.txt", FILE_EXISTS_REPLACE);
+      $this->fail('Expected exception not thrown');
+    }
+    catch (RuntimeException $e) {
+      $this->assertEqual("Invalid filename 'a\xFFtest\x80€.txt'", $e->getMessage());
+    }
   }
 
   /**
@@ -2388,7 +2387,7 @@ class FileDownloadTest extends FileTestCase {
     $this->assertEqual($headers['x-foo'], 'Bar', 'Found header set by file_test module on private download.');
     $this->assertResponse(200, 'Correctly allowed access to a file when file_test provides headers.');
 
-    // Test that the file transfered correctly.
+    // Test that the file transferred correctly.
     $this->assertEqual($contents, $this->content, 'Contents of the file are correct.');
 
     // Deny access to all downloads via a -1 header.
@@ -2564,6 +2563,7 @@ class FileNameMungingTest extends FileTestCase {
     parent::setUp();
     $this->bad_extension = 'php';
     $this->name = $this->randomName() . '.' . $this->bad_extension . '.txt';
+    $this->name_with_uc_ext = $this->randomName() . '.' . strtoupper($this->bad_extension) . '.txt';
   }
 
   /**
@@ -2601,9 +2601,13 @@ class FileNameMungingTest extends FileTestCase {
    * White listed extensions are ignored by file_munge_filename().
    */
   function testMungeIgnoreWhitelisted() {
-    // Declare our extension as whitelisted.
-    $munged_name = file_munge_filename($this->name, $this->bad_extension);
-    $this->assertIdentical($munged_name, $this->name, format_string('The new filename (%munged) matches the original (%original) once the extension has been whitelisted.', array('%munged' => $munged_name, '%original' => $this->name)));
+    // Declare our extension as whitelisted. The declared extensions should
+    // be case insensitive so test using one with a different case.
+    $munged_name = file_munge_filename($this->name_with_uc_ext, $this->bad_extension);
+    $this->assertIdentical($munged_name, $this->name_with_uc_ext, format_string('The new filename (%munged) matches the original (%original) once the extension has been whitelisted.', array('%munged' => $munged_name, '%original' => $this->name_with_uc_ext)));
+    // The allowed extensions should also be normalized.
+    $munged_name = file_munge_filename($this->name, strtoupper($this->bad_extension));
+    $this->assertIdentical($munged_name, $this->name, format_string('The new filename (%munged) matches the original (%original) also when the whitelisted extension is in uppercase.', array('%munged' => $munged_name, '%original' => $this->name)));
   }
 
   /**
@@ -2778,5 +2782,65 @@ class StreamWrapperTest extends DrupalWebTestCase {
     $this->assertEqual('foo', file_uri_scheme('foo://pork//chops'), 'Got the correct scheme from foo://asdf');
     $this->assertTrue(file_stream_wrapper_valid_scheme(file_uri_scheme('public://asdf')), 'Got a valid stream scheme from public://asdf');
     $this->assertFalse(file_stream_wrapper_valid_scheme(file_uri_scheme('foo://asdf')), 'Did not get a valid stream scheme from foo://asdf');
+  }
+
+  /**
+   * Tests that phar stream wrapper is registered as expected.
+   *
+   * @see file_get_stream_wrappers()
+   */
+  public function testPharStreamWrapperRegistration() {
+    if (!class_exists('Phar', FALSE)) {
+      $this->assertFalse(in_array('phar', stream_get_wrappers(), TRUE), 'PHP is compiled without phar support. Therefore, no phar stream wrapper is registered.');
+    }
+    elseif (version_compare(PHP_VERSION, '5.3.3', '<')) {
+      $this->assertFalse(in_array('phar', stream_get_wrappers(), TRUE), 'The PHP version is <5.3.3. The built-in phar stream wrapper has been unregistered and not replaced.');
+    }
+    else {
+      $this->assertTrue(in_array('phar', stream_get_wrappers(), TRUE), 'A phar stream wrapper is registered.');
+      $this->assertFalse(file_stream_wrapper_valid_scheme('phar'), 'The phar scheme is not a valid scheme for Drupal File API usage.');
+    }
+
+    // Ensure that calling file_get_stream_wrappers() multiple times, both
+    // without and with a drupal_static_reset() in between, does not create
+    // errors due to the PharStreamWrapperManager singleton.
+    file_get_stream_wrappers();
+    file_get_stream_wrappers();
+    drupal_static_reset('file_get_stream_wrappers');
+    file_get_stream_wrappers();
+  }
+
+  /**
+   * Tests that only valid phar files can be used.
+   */
+  public function testPharFile() {
+    if (!in_array('phar', stream_get_wrappers(), TRUE)) {
+      $this->pass('There is no phar stream wrapper registered.');
+      // Nothing else in this test is relevant when there's no phar stream
+      // wrapper. testPharStreamWrapperRegistration() is sufficient for testing
+      // the conditions of when the stream wrapper should or should not be
+      // registered.
+      return;
+    }
+
+    $base = dirname(dirname(__FILE__)) . '/files';
+
+    // Ensure that file operations via the phar:// stream wrapper work for phar
+    // files with the .phar extension.
+    $this->assertFalse(file_exists("phar://$base/phar-1.phar/no-such-file.php"));
+    $this->assertTrue(file_exists("phar://$base/phar-1.phar/index.php"));
+    $file_contents = file_get_contents("phar://$base/phar-1.phar/index.php");
+    $expected_hash = 'c7e7904ea573c5ebea3ef00bb08c1f86af1a45961fbfbeb1892ff4a98fd73ad5';
+    $this->assertIdentical($expected_hash, hash('sha256', $file_contents));
+
+    // Ensure that file operations via the phar:// stream wrapper throw an
+    // exception for files without the .phar extension.
+    try {
+      file_exists("phar://$base/image-2.jpg/index.php");
+      $this->fail('Expected exception failed to be thrown when accessing an invalid phar file.');
+    }
+    catch (Exception $e) {
+      $this->assertEqual(get_class($e), 'TYPO3\PharStreamWrapper\Exception', 'Expected exception thrown when accessing an invalid phar file.');
+    }
   }
 }

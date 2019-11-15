@@ -1,0 +1,75 @@
+body { color: #ccc; background: #1c242e; }
+
+body, legend { color: #aaa;}
+a, a:focus, a:visited { color: #ccc; }
+a:hover               { color: #fff; }
+H1, H3, INPUT.rateButtonSelected      { color: #ccc;}
+
+.pwg-icon                 { background-image: url(images/icons_sprite.png); }
+A:hover .pwg-icon         { background-image: url(images/icons_sprite-hover.png); }
+
+INPUT[type="button"], INPUT[type="submit"],
+INPUT[type="reset"], INPUT[type="file"],
+SELECT, TEXTAREA { color: #ccc;}
+
+input[type='text'], input[type='password'], input[type='button'], input[type='submit'], input[type='reset'], input[type='file'], select, textarea, option { background-color: #555; }
+
+#the_page { border: #10151c 1px solid; }
+
+#theHeader { border-bottom: #10151c 1px solid; }
+#g-footer { background-color: #10151c; }
+#g-theme-logo { background: transparent url('images/colorpack.png') no-repeat; }
+#g-footer a { color: #6392cf; }
+#g-footer a:hover { color: #fff; }
+
+#content, .content { background-color: #1c242e; }
+#menubar { background-color: #10151c; color: #ccc; }
+
+#menubar.top-bar { border-bottom: #10151c 1px solid; background-color: #222; }
+#menubar.header-bottom { border-bottom: #10151c 1px solid; background-color: #10151c; }
+#menubar.header-bottom dl:hover, #menubar.top-bar dl:hover { color: #fff; }
+#menubar.header-bottom dd, #menubar.top-bar dd { background-color: #222; border: #10151c 1px solid; border-top: none;  }
+
+#menubar.header-right dd { background-color: #222; }
+#menubar.header-right dd > ul > li:hover { background-color: #444; }
+
+.infos, .errors, .warnings { color: #FFF; background: #3D4F63; }
+
+.thumbnail { background-color: #344456; }
+
+#infoSwitcher.infohidden { background-color: #222;}
+#pictureCommentList li                { background-color: #444;}
+
+.calendarTitle         { background-color: #222; }
+#calendarViewSwitchBox { background-color: #222; }
+.content .navigationBar, span.calItem, td.calDayCellEmpty { color: #777; }
+
+.content .titrePage h2 #menuSwitcher { background: url("images/menu-min.png") 0px 2px no-repeat; }
+
+.switchBox, .header_notes { background-color: #555;}
+.commentElement { background-color: #1a1e27; }
+.message { background-color: #666;}
+
+.thumbnailCategory, .content .additional_info, #theImage .imageComment { border: #10151c 1px solid; background-color: #1a1e27; }
+
+#ato_header { border: none; border-bottom: #000000 1px solid; background: #212121; color: #ccc; }
+#ato_header > ul > li { border: none; }
+#ato_header > ul .close-panel:hover { color: #ccc; }
+#ato_header > ul > li a { color: #ccc; }
+#ato_header > ul > li ul a { color: #444; }
+
+#theImage img { border: 1px #666 solid; }
+
+ul.image-metadata { border-bottom: 1px solid #1a1e27; }
+ul.image-metadata li { }
+ul.image-metadata li:hover { } 
+ul.image-metadata li.active{ background: #1a1e27; }
+.image-metadata-tabs { background: #1a1e27; }
+
+#cboxWrapper { border: 1px solid #666; background: #1a1e27 !important; }
+#cboxLoadedContent { background: #1a1e27 !important; }
+#cboxPrevious, #cboxNext, #cboxSlideshow, #cboxClose { background-image: url(images/controls.png); }
+
+.gdHomeEnter { border: 1px solid #ccc; background: #1c242e; }
+.gdHomeEnter a { color: #6392cf; }
+.gdHomeEnter a:hover { color: #fff; }

@@ -102,11 +102,15 @@ function termstatus_entity_property_info_alter(&$entity_info) {
  * Implements hook_form_FORM_ID_alter().
  */
 function termstatus_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
+  // Do not show termstatus settings on delete confirmation form.
+  if (!empty($form_state['confirm_delete'])) {
+    return;
+  }
+
   $term = $form_state['term'];
 
   $form['termstatus'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer taxonomy'),
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
@@ -128,7 +132,6 @@ function termstatus_form_taxonomy_form_vocabulary_alter(&$form, &$form_state, $f
 
   $form['termstatus'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer taxonomy'),
     '#title' => t('Default publishing options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
@@ -149,6 +152,15 @@ function termstatus_form_taxonomy_form_vocabulary_alter(&$form, &$form_state, $f
 function termstatus_form_taxonomy_form_vocabulary_submit($form, &$form_state) {
   $vocabulary = $form_state['vocabulary'];
   variable_set('termstatus_default_' . $vocabulary->machine_name, $form_state['values']['termstatus_default_status']);
+}
+
+/**
+ * Implemens hook_preprocess_HOOK().
+ */
+function termstatus_preprocess_taxonomy_term(&$variables) {
+  if (isset($variables['term']->status) && empty($variables['term']->status)) {
+    $variables['classes_array'][] = 'term-unpublished';
+  }
 }
 
 /**
@@ -195,6 +207,7 @@ function termstatus_query_term_access_alter(QueryAlterableInterface $query) {
   $tables =& $query->getTables();
 
   if (variable_get('termstatus_enable', FALSE) &&
+    !user_access('administer taxonomy') &&
     !user_access('view unpublished taxonomy terms') &&
     !$query->hasTag('status_unpublished')) {
     // Extract taxonomy_term_data tables.
@@ -215,6 +228,7 @@ function termstatus_query_term_access_alter(QueryAlterableInterface $query) {
  */
 function termstatus_term_access($term, $account = NULL) {
   if (variable_get('termstatus_enable', FALSE) &&
+    !user_access('administer taxonomy', $account) &&
     !user_access('view unpublished taxonomy terms', $account)) {
     $result = db_query('SELECT status FROM {termstatus} where tid = :tid',
       array(':tid' => $term->tid));
@@ -223,6 +237,35 @@ function termstatus_term_access($term, $account = NULL) {
   else {
     return user_access('access content', $account);
   }
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * Inject a menu access callback for taxonomy term pages.
+ */
+function termstatus_menu_alter(&$items) {
+  $orig_callback = isset($items['taxonomy/term/%taxonomy_term']['access callback']) ? $items['taxonomy/term/%taxonomy_term']['access callback'] : 'user_access';
+  $orig_arguments = $items['taxonomy/term/%taxonomy_term']['access arguments'];
+  $items['taxonomy/term/%taxonomy_term']['access callback'] = 'termstatus_menu_access';
+  $items['taxonomy/term/%taxonomy_term']['access arguments'] = array(2, $orig_callback, $orig_arguments);
+}
+
+/**
+ * Menu access callback. Return true if access to term is granted.
+ */
+function termstatus_menu_access($term, $orig_callback, $orig_arguments) {
+  if ($orig_callback && !call_user_func_array($orig_callback, $orig_arguments)) {
+    return FALSE;
+  }
+
+  if (variable_get('termstatus_enable', FALSE) &&
+    !user_access('administer taxonomy') &&
+    !user_access('view unpublished taxonomy terms')) {
+    return !empty($term->status);
+  }
+
+  return TRUE;
 }
 
 /**

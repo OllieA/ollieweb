@@ -1,0 +1,254 @@
+=== Grey Dragon Theme ===
+Grey Dragon Theme - a custom theme for Piwigo 2
+
+Tags: HTML 5, Bootstrap, Open Sans
+
+This theme was designed and built by Serguei Dosyukov
+http://blog.dragonsoft.us/
+Copyright (C) 2009-2019 Serguei Dosyukov
+
+Compatible: PW 2.7, 2.8, 2.9
+Minimum requirement: PW 2.7.0
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+details. You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street Fifth Floor, Boston, MA  02110-1301, USA.
+
+=== Changelog ===
+version 1.3.2
++ Translation improvements: DK, RU
+- Fixed issue with some icons missing after migration to Font Awesome
+- Fixed issue with some dialog sizes in Picture mode
+
+version 1.3.1
++ Verified for PHP 7.2
++ Validated support for PIWIGO 2.9.4
+- Fixed issue with header.tpl check for custom css content in PHP 7.2
++ Updated to use Bootstrap v4.1.3
++ Updated to use FontAwesome 5.6.3
+
+version 1.3.0
++ Validated support for PIWIGO 2.9
++ Min Piwigo version required is set to 2.7.0
++ CSS: Added FontAwesome support
++ ADMIN: Layout changed to use FontAwesome
++ Fixed issue with hower icons be too dark in some colorpacks
++ LANG: Translation support has been reset. Lang string refresh added for EN
+- Fixed issue with download link in admin area
+
+version 1.2.28
++ Translation improvements: CZ, LV, NL
++ Bootstrap CSS updated to 3.3.7
++ ADMIN: Small css improvements
++ Fixed issues with menus in various modes
++ CSS: Fixed issues with login page colors for controls
++ Added ID for image download link
+
+version 1.2.27
++ Validated support for PIWIGO 2.8
++ Translation improvements: ES, DE, GR, EO, HU, KR, MN, PL, SI, TH, VN, CN, HK
++ Bootstrap CSS updated to 3.3.6
+
+version 1.2.26
++ ADMIN: New option - Include "Click to Enter" link for Root Page
++ ADMIN: Small style improvements for styles and menu support
++ CSS: Added theme-<colorpack> class to body element allowing individual styling with 3rd party plugins
++ CSS: Small style improvements                                                   
++ Translation support: Added he_IL, th_TH, el_GR, zh_CN language
++ Added support for translation of Home Page Quote
++ Bootstrap CSS updated to 3.3.5
+
+version 1.2.25
++ ADMIN: Small style improvements
++ ADMIN: New Main Menu Mode: Static Menu - Header Right
++ Translation support: 46 languages added 
++ Bootstrap CSS updated to 3.3.4
+
+version 1.2.24
++ CSS: min width of drop down menu in header bottom menu mode is increased to 20em for better content alignment
+- Fixed navigation arrows photo overlay when thumbnail navigation bar is enabled
+
+version 1.2.23
++ Added Icon tooltips in Icon metadata tab mode. This would also cause title to be shown in metadata overlay window
++ Added navigation arrows display when hover over photo. This is visual indicators to help with visualization of navigation. Use of image maps is still permitted
++ "Auto Close Popup Menu on Refresh" is now "Auto Close Popup Menu" - menu would close as soon as mouse leaves the popup menu area
++ Corrected PayPal link for "Donate" link in admin area
+- Further fixes for Picture Overlay mode - Tags' "edit" was missing for some browsers
+
+version 1.2.22 *
++ Added Photo metadata tab targets in picture.tpl (see template for positioning): {*GD_META_ICO*}, {*GD_META_TXT*}, {*GD_META_CONTENT*}
++ Picture tab "classic" content moved into external templates picture_tab_ico.tpl, picture_tab_txt.tpl, picture_tab_content.tpl
++ Added support for gd_get_metadata content trigger
+  You can add custom content for picture meta tabs 
+    Ex: add_event_handler('gd_get_metadata', 'my_get_tab_metadata');
+        function greydragon_get_tab_metadata($metadata) { return $metadata; }
+        where each array element represents the tab
+          $metadata[] = array(
+             "id"         => unique id of the tab
+             "icon_class" => class to be used to render icon tabs
+             "title"      => tab or menu block title
+             "content"    => block content
+             "target"     => optional, rendering target - "left", "top", "right", "bottom", not supported, reserved for future use
+             "combine"    => combine_css or combine_js reference block
+           );
+  Prior to rendering $metadata is processed and converted in appropriate construct to be used by the theme
+  See ShareThis plugin for more details
++ Tab switch logic in Photo page optimized to allow management of dynamic tabs introduced by 3rd party plugins
++ Improved presentation and content alignment of Tags tab in picture page
++ Added support for auto-close of popup menu on navigation or refresh - Auto Close Popup Menu on Refresh 
++ Help improvements
+- Fixed issue with missing colorpack setting when theme is first installed and settings are not set yet
+- Fixed issue with number of undefined theme params (unused at this time)
+- Fixed issue with missing enumerator for $footer_elements in footer.tpl
+
+version 1.1.21
+- Another attempt to fix issue with root url associated with gallery logo was not referring to the sites root properly when installed as sub-folder
+
+version 1.1.20
++ ADMIN: Added support for various Favicon types including Apple Touch
++ Added versioning for Theme settings for easier maintenance
++ Localization added for Admin Help area
++ Added support for %gallery_title% in header text/page banner
+- Fixed issue with root url associated with gallery logo was not referring to the sites root properly when installed as sub-folder
+
+version 1.1.19
++ custom.css location moved to local/greydragon/ to comply with PWG guidelines. File should be automatically created when theme is updated.
+  Please make sure that migration is successful as it may require adjustment of "local" Folder permissions in some cases
+- Fix issue when Static menu would cause misalignment of the content in 3rd party plugins
+- Adjust min height of the content with Static menu to better fit the screen
+- Fixed issue when using SEO friendly URLs would cause logo not being visible in sub pages
+
+version 1.0.18
+- Added check for custom.css being present on new installations to prevent SMARTY error
+- Added additional "special" pages not to display main menu 
+
+version 1.0.17
++ Added check for anonymous users when no comments present to show "No Comments allowed" in Picture page
++ Added support for "Activate navigation thumbnails" option of the PWG in photo pages
+- Suppressed support for Exif metadata icon managed by general settings in Photo pages. This logic is managed by "Hide Exif Data" option of the theme
+- Fixed issue with content alignment in Calendar page when Static menu is used
+
+version 1.0.16
++ Version information moved into greydragon.class.php for easier maintenance
+- Fixed issue with missing link to switchbox.js in photo pages which would prevent "photo sizes" drop down to work
+
+version 1.0.15
++ ADMIN: Added "Image Size" option for Root Page
++ ADMIN: Added "Hide EXIF" option for Photo Page
++ ADMIN: Help content moved into standalone template file
++ Added support for "User Tags" plugin
++ Added support for PayPal Order Cart module - PayPal entry form now integrated as a Tab or Overlay
++ PNG size optimization for theme elements
++ Improved styles of Colorbox for overlays
++ "Tags" picture data made optional - tab would be visible only if tags are present or "User Tags" plugin is enabled
+- Fixed issue with Colorbox not be referenced in some cases causing popup overlay dialogs functionlity not be supported when user is not logged in
+- Fixed issue of breadcrumb overlap with image toolbar
+
+version 1.0.14
++ Hiding of photo counters extended to category menu
++ Infos, Warnings and Errors message area moved into popup overlay. For Infos and Warnings message would be removed after 8 seconds. "Errors" is closed on click.
++ ADMIN: Photo Metadata display mode can be switched between tabs with text/icon expanded or collapsed, text/icon with overlay, or hidden
++ ADMIN: Added ChangeLog link in toolbar
+- ContactForm plugin: Fixed form styles to make page better aligned
+- ADMIN: Fixed issue when under some conditions config info could become corrupted
+- Deprecated events to populate page header - code moved into header template
+- Fixed missing div in photo page
+- Page layout HTML 5 validation of photo page
+                                                                  
+version 1.0.13
++ New colorpack - GreyDragon
++ ADMIN: Added support for horizontal menu - "Static Menu - Header Bottom". When used with Additional Pages Plugin, pages except Root Page would be embeded into menu bar instead of drop down menu.
++ ADMIN: Added option "Display navigation arrows" for Root page
++ ADMIN: Added option "Display navigation controls" for Root page
++ Added support for thumb shadow space - custom CSS is required (please refer to help section in admin area). Latest gdThumb is recomended.
++ CSS: cleanup
+- Removed hardcoded height for root page slideshow to accomodate navigation controls
+- Fixed issues with Categories List overlapping when Static menu is enabled
+- In Phote page, hide overflow photo when huge size is used
+
+version 1.0.12
++ ADMIN: JS is moved out page source into dedicated admin.js for better reusability
+- Fixed issue with active menu header not being highlighted in PWG 2.7
+
+version 1.0.11
++ Full support for themeconf[colorscheme] implemented
++ Removed use of background images in admin area to improve performance
++ CSS: Enforce min width for admin area - 1270px to allow proper display of help section
++ Admin: added help section for Advanced Options - Custom CSS with few samples
++ Admin: new option for Root page - Adapt slideshow size to each photo, i.e. elastic mode
+- CSS: Removed overflow: visible for #theImage causing scroll bar to appear in some cases for image in photo page
+- CSS: Removed min-width for footer
+
+version 1.0.10
++ Piwigo 2.7 compatible
++ Removed use of local_head.tpl
++ Added support for themeconf[colorscheme]
+- CSS: adjust background for image thumbs to match respective color packs when gdThumb is not installed
+- Admin: added auto-hide for Info messages (10 seconds)
+
+version 1.0.9 - official release
++ Admin: "Admin Tools" plugin added as recommended
++ Admin: "gdThumb" plugin added as recommended
++ Admin: Recommended plugins are now linked to associated Piwigo Extensions pages
++ Admin: New option - Hide About Link
++ Admin: New option - Animate Menu
++ Admin: If Header Text is not used, then global "Page banner" would be taken in consideration
++ Admin: Site credits can be shown as text/icon or hidden
++ Admin: New option - Include Contact Webmaster Email in the Footer for Members
++ Admin: New option - Remove photo counter in breadcrumbs
++ New colorpack - blackhawk
++ CSS: If footer text is not used, footer would "collapse" into 1 line
++ CSS: If neiter header text or logo is set, header would collapse
++ CSS: Added box style for additional info box in albums and photo pages
++ CSS: Info/Warning/Error message boxes are now take only space needed
++ CSS: Pages impose min height for mid section to prevent layout "collapse" on load
++ "My profile" link moved to the first position and would shows user's name instead
++ Improvements to menu presentation and state handling
++ Hide "administration" link in the footer if "Admin Tools" plugin is enabled
++ Adds "Theme Config" option under "Administration" menu if "Admin Tools" plugin is enabled
++ Major redesign of Menu handling. Static Menu is not allowed in Picture pages
++ Added support for tab view for metadata and comments in Photo page. New Admin option: Default tab to be displayed
+- JS reorganizing
+- CSS clean up
+- Fixed issue when change to root page content was not detected causing misleading message in Admin area on Save
+- Fixed capitalization of "contact" link in footer.tpl 
+- Fixed issue in IE when Admin Tools menu closes while trying to navigate
+- Fixed thumb positioning to center thumb image
+- Fixed issue when empty strings in settings would not be recognized as empty value
+
+version 1.0 build alpha 6
++ CSS cleanup
++ If Gallery Description left empty, space would not be allocated in the Root Page causing image to be centered
++ New colorpack: whitehawk - White theme
+
+version 1.0 build alpha 5
+- Fixed issue with uninitialized variable when neither favicon or "no generator" are selected
+
+version 1.0 build alpha 4
++ Admin: New option "Remove Piwigo Generator Meta Tag" which can be used along with "Show Site Credits"
++ Admin: Added support to allow "lower case text" be optional
++ Use of custom.css file is extended to take advantage of its flexibility and prevent dynamic inline CSS where applicable
++ Changes to Info/Warning/Error messages colors to better match the theme
++ Admin: More translation support added for theme options
+- Admin: Fixed issue when some default settings were not properly persisted causing improper application
+- Admin: Fixed issue with Smarty cache not being purged when some settings are applied.
+- During conversion to Bootstrap I broke use of font-based icons, it is now fixed (ex: comment collapse area)
+
+version 1.0 build alpha 3
++ Major theme code refactoring. Theme logic is now "classified"
++ Bootstrap CSS support introduced to alleviate browser dependencies.
++ Theme's CSS is moved out of theme.css to ensure proper application
++ Admin: Added option to enable debug mode
++ Admin: Added option to reset theme settings
++ Admin: Added check for required PW version and plugins
++ Admin: Theme styling is extended to Theme's admin area
+- Admin: Removed option to suppress noindex for Robots (managed from PW config.inc)
+- Admin: Fixed issue with quotes not stored properly in various fields
+
+version 1.0 build alpha 2
++ Added support for Root Page settings. Requires Additional Pages Module
+
+version 1.0 build alpha 1
++ initial release

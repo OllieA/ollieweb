@@ -35,9 +35,9 @@ features[] = primary_links
 settings[] = columns
 
  
-; Information added by drupal.org packaging script on 2011-04-13
+; Information added by drupal.org packaging script on 2013-09-30
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "analytic"
-datestamp = "1302652978"
+datestamp = "1380553797"
 

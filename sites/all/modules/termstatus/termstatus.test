@@ -114,6 +114,24 @@ class TermstatusSafeguardTestCase extends TermstatusWebTestCase {
     $req = reset($termstatus_requirements);
     $this->assertEqual($req['severity'], REQUIREMENT_OK, 'Severity of requirement record should be "ok" after "termstatus_enable" variable has been manipulated.');
   }
+
+  /**
+   * Tests the first-use-safeguard mechanism when no terms are present.
+   */
+  public function testFirstUseSafeguardNoTerms() {
+    // Make sure variable termstatus_enable does not exist.
+    variable_del('termstatus_enable');
+
+    module_enable(array('termstatus'));
+
+    // Reset/rebuild all data structures after enabling the modules.
+    $this->resetAll();
+
+    // Safeguard against unpublished terms: Variable termstatus_enable should
+    // be set to TRUE when no terms were present at the point of time, the
+    // module has been enabled.
+    $this->assertIdentical(TRUE, variable_get('termstatus_enable'), 'Variable termstatus_enable should be set to true after module is enabled, when no terms are present in the database.');
+  }
 }
 
 /**
@@ -137,6 +155,7 @@ class TermstatusAdminTestCase extends TermstatusWebTestCase {
    */
   public function setUp() {
     parent::setUp(array('termstatus'));
+    variable_set('termstatus_enable', TRUE);
   }
 
   /**
@@ -281,5 +300,97 @@ class TermstatusAccessTestCase extends TermstatusWebTestCase {
     $this->drupalGet('termstatus-test-term-list/' . $this->vocabulary->vid);
     $this->assertLinkByHref('taxonomy/term/' . $this->publishedTerm->tid, 0, 'Published term is in term listing for privileged user');
     $this->assertLinkByHref('taxonomy/term/' . $this->unpublishedTerm->tid, 0, 'Unpublished term is in term listing for privileged user');
+
+    $admin = $this->drupalCreateUser(array('administer taxonomy'));
+    $this->drupalLogin($admin);
+
+    $this->drupalGet('taxonomy/term/' . $this->publishedTerm->tid);
+    $this->assertResponse(200, 'Admin can access published term');
+    $this->drupalGet('taxonomy/term/' . $this->unpublishedTerm->tid);
+    $this->assertResponse(200, 'Admin can access unpublished term');
+
+    $this->drupalGet('termstatus-test-term-list/' . $this->vocabulary->vid);
+    $this->assertLinkByHref('taxonomy/term/' . $this->publishedTerm->tid, 0, 'Published term is in term listing for admin');
+    $this->assertLinkByHref('taxonomy/term/' . $this->unpublishedTerm->tid, 0, 'Unpublished term is in term listing for admin');
+  }
+
+  /**
+   * Test that api function for unpublished terms.
+   */
+  public function testAPIFunctionForUnpublishedTerms() {
+    $guest = drupal_anonymous_user();
+    $result = termstatus_term_access($this->publishedTerm, $guest);
+    $this->assertTrue($result, 'Anonymous is granted access to published term');
+    $result = termstatus_term_access($this->unpublishedTerm, $guest);
+    $this->assertFalse($result, 'Anonymous is denied access to unpublished term');
+
+    $editor = $this->drupalCreateUser(array('view unpublished taxonomy terms'));
+    $result = termstatus_term_access($this->publishedTerm, $editor);
+    $this->assertTrue($result, 'Privileged user is granted access to published term');
+    $result = termstatus_term_access($this->unpublishedTerm, $editor);
+    $this->assertTrue($result, 'Privileged user is granted access to unpublished term');
+
+    $admin = $this->drupalCreateUser(array('administer taxonomy'));
+    $result = termstatus_term_access($this->publishedTerm, $admin);
+    $this->assertTrue($result, 'Admin is granted access to published term');
+    $result = termstatus_term_access($this->unpublishedTerm, $admin);
+    $this->assertTrue($result, 'Admin is granted access to unpublished term');
+  }
+
+  /**
+   * Test visibility of unpublished terms in menu.
+   */
+  public function testVisibilityOfMenuLinksForPrivilegedUser() {
+    $published_menu_link = array(
+      'link_path' => 'taxonomy/term/' . $this->publishedTerm->tid,
+      'link_title' => $this->publishedTerm->name,
+      'menu_name' => 'main-menu',
+    );
+    $unpublished_menu_link = array(
+      'link_path' => 'taxonomy/term/' . $this->unpublishedTerm->tid,
+      'link_title' => $this->unpublishedTerm->name,
+      'menu_name' => 'main-menu',
+    );
+    menu_link_save($published_menu_link);
+    menu_link_save($unpublished_menu_link);
+
+    $editor = $this->drupalCreateUser(array('view unpublished taxonomy terms'));
+    $this->drupalLogin($editor);
+
+    $this->drupalGet('node');
+
+    $this->assertLinkByHref('taxonomy/term/' . $this->publishedTerm->tid, 0, 'Menu link for published term is visible');
+    $this->assertLinkByHref('taxonomy/term/' . $this->unpublishedTerm->tid, 0, 'Menu link for unpublished term is visible');
+
+    $admin = $this->drupalCreateUser(array('administer taxonomy'));
+    $this->drupalLogin($admin);
+
+    $this->drupalGet('node');
+
+    $this->assertLinkByHref('taxonomy/term/' . $this->publishedTerm->tid, 0, 'Menu link for published term is visible');
+    $this->assertLinkByHref('taxonomy/term/' . $this->unpublishedTerm->tid, 0, 'Menu link for unpublished term is visible');
+  }
+
+  /**
+   * Test visibility of unpublished terms in menu.
+   */
+  public function testVisibilityOfMenuLinksForGuest() {
+    $published_menu_link = array(
+      'link_path' => 'taxonomy/term/' . $this->publishedTerm->tid,
+      'link_title' => $this->publishedTerm->name,
+      'menu_name' => 'main-menu',
+    );
+    $unpublished_menu_link = array(
+      'link_path' => 'taxonomy/term/' . $this->unpublishedTerm->tid,
+      'link_title' => $this->unpublishedTerm->name,
+      'menu_name' => 'main-menu',
+    );
+    menu_link_save($published_menu_link);
+    menu_link_save($unpublished_menu_link);
+
+    $this->drupalGet('node');
+
+    $this->assertLinkByHref('taxonomy/term/' . $this->publishedTerm->tid, 0, 'Menu link for published term is visible');
+    $this->assertNoLinkByHref('taxonomy/term/' . $this->unpublishedTerm->tid, 0, 'Menu link for unpublished term is not visible');
   }
 }

@@ -1,0 +1,87 @@
+/*{{{  Spécial mode diaporama */
+body #imageHeaderBar .browsePath  a {
+	background: url(icon/stop.png) right center no-repeat;
+	padding-right: 20px;
+	color: #DDE1E9;
+	border-color: #DDE1E9;
+	_background-image:url(images/stop-ie.png);
+}
+body #imageHeaderBar .browsePath {
+	float: left;
+	margin: 0;
+	padding: 0 3px 0 0;
+	color: gray;
+}
+body #imageHeaderBar .imageNumber {
+	float: left;
+}
+body #imageHeaderBar h2 {
+	padding: 0;
+	color:white;
+	clear: none;
+	margin: 0 230px;
+	font-size: 110%;
+	height: 32px;
+	width: auto;
+	position: static;
+}
+body div#imageToolBar  {
+	position: absolute;
+	width: 260px;
+	margin: 0;
+	right: 0;
+	top: 5px;
+	height: 20px;
+}
+body div#imageToolBar a {
+	width: 28px;
+}
+body  {
+	background: #636363 url(images/fond_diapo.png);
+}
+body #the_page {
+	background: url(images/entete_diapo.png) 0 -10px repeat-x;
+	padding-top: 1px;
+}
+
+body #theHeader,
+body #copyright
+{
+	display: none !important;
+}
+body #theImage,
+html body div#theImage noscript>div {
+	position:absolute;
+	width:100%;
+	top: 32px;
+	bottom: 0;
+}
+
+html body div#theImage noscript>div {
+	top: 0;
+	bottom: 0;
+	height: 100%;
+}
+
+html body div#theImage noscript>div>img {
+	max-width: 100% !important;
+	max-height: 100% !important;
+	height: auto !important;
+	width: auto !important;
+	position: relative;
+}
+
+body #the_page {
+	position: static;
+}
+
+body #theImage img {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+body {
+	min-width: 0;
+}
+/*}}}*/
+
